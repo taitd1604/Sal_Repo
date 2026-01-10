@@ -10,15 +10,17 @@ SHIFT_CONFIG = {
         "label": "Đêm nhạc",
         "start_time": time(hour=19, minute=30),
         "scheduled_end": time(hour=23, minute=0),
-        "base_pay": {"self": 600_000, "outsourced": 300_000},
+        "base_pay": 600_000,
     },
     "openmic": {
         "label": "Openmic",
         "start_time": time(hour=20, minute=0),
         "scheduled_end": time(hour=23, minute=0),
-        "base_pay": {"self": 500_000, "outsourced": 200_000},
+        "base_pay": 500_000,
     },
 }
+
+OUTSOURCED_PAY_CHOICES = (400_000, 500_000, 600_000)
 
 CSV_HEADER = [
     "date",
@@ -32,6 +34,8 @@ CSV_HEADER = [
     "ot_minutes",
     "ot_pay",
     "total_pay",
+    "worker_payment",
+    "net_income",
 ]
 
 
@@ -42,6 +46,7 @@ class ShiftPayload:
     event_type: str
     performed_by: str
     actual_end_time: time
+    worker_payment: int = 0
 
     def compute(self) -> Dict[str, str]:
         cfg = SHIFT_CONFIG[self.event_type]
@@ -52,10 +57,12 @@ class ShiftPayload:
             actual_end_dt += timedelta(days=1)
 
         duration_hours = (scheduled_end_dt - scheduled_start_dt).total_seconds() / 3600
-        base_pay = cfg["base_pay"][self.performed_by]
+        base_pay = cfg["base_pay"]
         ot_minutes = _calculate_ot_minutes(scheduled_end_dt, actual_end_dt)
         ot_pay = _calculate_ot_pay(base_pay, duration_hours, ot_minutes)
         total_pay = base_pay + ot_pay
+        worker_payment = self.worker_payment if self.performed_by == "outsourced" else 0
+        net_income = total_pay - worker_payment
         return {
             "date": self.date.isoformat(),
             "venue": self.venue,
@@ -68,6 +75,8 @@ class ShiftPayload:
             "ot_minutes": str(ot_minutes),
             "ot_pay": f"{ot_pay:.0f}",
             "total_pay": f"{total_pay:.0f}",
+            "worker_payment": f"{worker_payment:.0f}",
+            "net_income": f"{net_income:.0f}",
         }
 
     @property
@@ -76,7 +85,7 @@ class ShiftPayload:
         return (
             f"{computed['date']} – {computed['event_type']} tại {computed['venue']}\n"
             f"Người trực: {computed['performed_by']}\n"
-            f"Base pay: {computed['base_pay']} | OT: {computed['ot_pay']} | Tổng: {computed['total_pay']}"
+            f"Base pay: {computed['base_pay']} | OT: {computed['ot_pay']} | Tổng: {computed['total_pay']} | Ròng: {computed['net_income']}"
         )
 
 

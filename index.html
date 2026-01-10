@@ -24,6 +24,14 @@
           <p id="total-pay">--</p>
         </article>
         <article class="card">
+          <h3>Thu ròng</h3>
+          <p id="net-income">--</p>
+        </article>
+        <article class="card">
+          <h3>Chi phí thuê</h3>
+          <p id="total-worker-pay">--</p>
+        </article>
+        <article class="card">
           <h3>OT (phút)</h3>
           <p id="total-ot">--</p>
         </article>
@@ -42,6 +50,7 @@
           <h2>Thu nhập theo tháng</h2>
           <select id="chart-mode">
             <option value="total_pay" selected>Tổng lương</option>
+            <option value="net_income">Thu ròng</option>
             <option value="ot_pay">Lương OT</option>
           </select>
         </div>
@@ -63,12 +72,14 @@
                 <th>Người trực</th>
                 <th>Giờ kết thúc</th>
                 <th>OT</th>
+                <th>Chi thuê</th>
                 <th>Tổng</th>
+                <th>Ròng</th>
               </tr>
             </thead>
             <tbody id="shift-rows">
               <tr>
-                <td colspan="7">Đang tải dữ liệu...</td>
+                <td colspan="9">Đang tải dữ liệu...</td>
               </tr>
             </tbody>
           </table>

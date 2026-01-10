@@ -28,7 +28,7 @@ async function init() {
   } catch (error) {
     console.error(error);
     const body = document.getElementById("shift-rows");
-    body.innerHTML = `<tr><td colspan="7">Không thể tải dữ liệu: ${error.message}</td></tr>`;
+    body.innerHTML = `<tr><td colspan="9">Không thể tải dữ liệu: ${error.message}</td></tr>`;
   }
 }
 
@@ -41,21 +41,35 @@ async function loadCsv(path) {
   const parsed = Papa.parse(text, { header: true });
   return parsed.data
     .filter((row) => row.date)
-    .map((row) => ({
-      ...row,
-      base_pay: parseFloat(row.base_pay || 0),
-      ot_minutes: Number(row.ot_minutes || 0),
-      ot_pay: parseFloat(row.ot_pay || 0),
-      total_pay: parseFloat(row.total_pay || 0),
-    }));
+    .map((row) => {
+      const basePay = Number(row.base_pay || 0);
+      const otMinutes = Number(row.ot_minutes || 0);
+      const otPay = Number(row.ot_pay || 0);
+      const totalPay = Number(row.total_pay || 0);
+      const workerPayment = Number(row.worker_payment || 0);
+      const netIncome = row.net_income ? Number(row.net_income) : totalPay - workerPayment;
+      return {
+        ...row,
+        base_pay: basePay,
+        ot_minutes: otMinutes,
+        ot_pay: otPay,
+        total_pay: totalPay,
+        worker_payment: workerPayment,
+        net_income: netIncome,
+      };
+    });
 }
 
 function updateSummary(rows) {
   const totalPay = rows.reduce((sum, row) => sum + (row.total_pay || 0), 0);
   const totalOt = rows.reduce((sum, row) => sum + (row.ot_minutes || 0), 0);
+  const totalWorker = rows.reduce((sum, row) => sum + (row.worker_payment || 0), 0);
+  const totalNet = rows.reduce((sum, row) => sum + (row.net_income || 0), 0);
   const selfCount = rows.filter((row) => (row.performed_by || "").includes("Tự")).length;
   const outsourced = rows.length - selfCount;
   document.getElementById("total-pay").textContent = currency.format(totalPay);
+  document.getElementById("net-income").textContent = currency.format(totalNet);
+  document.getElementById("total-worker-pay").textContent = currency.format(totalWorker);
   document.getElementById("total-ot").textContent = totalOt;
   document.getElementById("total-shifts").textContent = rows.length;
   document.getElementById("self-vs-outsourced").textContent = `${selfCount}/${outsourced}`;
@@ -79,7 +93,9 @@ function renderTable(rows) {
         <td>${row.performed_by}</td>
         <td>${row.actual_end_time || row.scheduled_end_time}</td>
         <td>${row.ot_minutes} ph</td>
+        <td>${currency.format(row.worker_payment || 0)}</td>
         <td>${currency.format(row.total_pay)}</td>
+        <td>${currency.format(row.net_income || 0)}</td>
       </tr>`
     )
     .join("");
@@ -93,7 +109,17 @@ function renderChart(rows, metric = "total_pay") {
   });
   const labels = Object.keys(monthly).sort();
   const data = labels.map((label) => Math.round(monthly[label]));
-  const datasetLabel = metric === "total_pay" ? "Tổng lương" : "Lương OT";
+  const labelMap = {
+    total_pay: "Tổng lương",
+    net_income: "Thu ròng",
+    ot_pay: "Lương OT",
+  };
+  const colorMap = {
+    total_pay: "#6366f1",
+    net_income: "#0f766e",
+    ot_pay: "#f97316",
+  };
+  const datasetLabel = labelMap[metric] || "Tổng lương";
   const config = {
     type: "bar",
     data: {
@@ -102,7 +128,7 @@ function renderChart(rows, metric = "total_pay") {
         {
           label: datasetLabel,
           data,
-          backgroundColor: metric === "total_pay" ? "#6366f1" : "#f97316",
+          backgroundColor: colorMap[metric] || colorMap.total_pay,
         },
       ],
     },
@@ -128,12 +154,14 @@ function renderChart(rows, metric = "total_pay") {
 
 function renderEmptyState() {
   document.getElementById("total-pay").textContent = "0";
+  document.getElementById("net-income").textContent = "0";
+  document.getElementById("total-worker-pay").textContent = "0";
   document.getElementById("total-ot").textContent = "0";
   document.getElementById("total-shifts").textContent = "0";
   document.getElementById("self-vs-outsourced").textContent = "0/0";
   document.getElementById("last-updated").textContent = "";
   document.getElementById("shift-rows").innerHTML =
-    '<tr><td colspan="7">Chưa có dữ liệu, hãy log ca đầu tiên nhé!</td></tr>';
+    '<tr><td colspan="9">Chưa có dữ liệu, hãy log ca đầu tiên nhé!</td></tr>';
 }
 
 init();
