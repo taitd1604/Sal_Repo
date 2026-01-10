@@ -23,6 +23,8 @@ body {
   background-size: 32px 32px;
   color: var(--ink);
   letter-spacing: 0.02em;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
 }
 
 header {
@@ -177,6 +179,15 @@ tbody tr:hover {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    box-shadow: none;
+    border-left: 0;
+    border-right: 0;
+    padding-top: calc(1.8rem + env(safe-area-inset-top));
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .panel-head {
