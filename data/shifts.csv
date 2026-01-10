@@ -1,2 +1,3 @@
 date,venue,event_type,performed_by,start_time,scheduled_end_time,actual_end_time,base_pay,ot_minutes,ot_pay,total_pay
 2025-01-10,Bee,Đêm nhạc,Tự làm,19:30,23:00,23:02,600000,15,42857,642857
+2025-01-06,Bee,Đêm nhạc,Tự làm,19:30,23:00,22:55,600000,0,0,600000
