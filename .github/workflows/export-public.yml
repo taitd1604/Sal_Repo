@@ -9,6 +9,9 @@ on:
       - "scripts/export_public_csv.py"
       - ".github/workflows/export-public.yml"
 
+permissions:
+  contents: write
+
 jobs:
   build-public-csv:
     runs-on: ubuntu-latest
@@ -29,6 +32,8 @@ jobs:
 
       - name: Commit sanitized CSV
         uses: stefanzweifel/git-auto-commit-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.PUBLIC_CSV_PAT }}
         with:
           commit_message: "chore: update public CSV"
           file_pattern: data/shifts_public.csv
