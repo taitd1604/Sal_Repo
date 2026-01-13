@@ -4,6 +4,11 @@ const currency = new Intl.NumberFormat("vi-VN", {
   maximumFractionDigits: 0,
 });
 
+const state = {
+  rows: [],
+  chart: null,
+};
+
 async function init() {
   try {
     const rows = await loadCsv("./data/shifts_public.csv");
@@ -11,8 +16,10 @@ async function init() {
       renderEmptyState();
       return;
     }
+    state.rows = rows;
     updateSummary(rows);
     renderTable(rows);
+    renderChart(rows);
   } catch (error) {
     console.error(error);
     document.getElementById("shift-rows").innerHTML =
@@ -68,6 +75,50 @@ function renderTable(rows) {
     .join("");
 }
 
+function renderChart(rows) {
+  const byMonth = {};
+  rows.forEach((row) => {
+    const month = row.date.slice(0, 7);
+    byMonth[month] = (byMonth[month] || 0) + row.ot_minutes;
+  });
+  const labels = Object.keys(byMonth).sort();
+  const data = labels.map((label) => byMonth[label]);
+  const config = {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "OT (phút)",
+          data,
+          backgroundColor: "#ff5d73",
+          borderWidth: 2,
+          borderColor: "#111",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  };
+
+  if (state.chart) {
+    state.chart.destroy();
+  }
+  const ctx = document.getElementById("otChart").getContext("2d");
+  state.chart = new Chart(ctx, config);
+}
+
 function renderEmptyState() {
   document.getElementById("total-shifts").textContent = "0";
   document.getElementById("total-ot").textContent = "0";
@@ -76,6 +127,10 @@ function renderEmptyState() {
   document.getElementById("last-updated").textContent = "--";
   document.getElementById("shift-rows").innerHTML =
     '<tr><td colspan="6">Chưa có dữ liệu để hiển thị</td></tr>';
+  if (state.chart) {
+    state.chart.destroy();
+    state.chart = null;
+  }
 }
 
 init();

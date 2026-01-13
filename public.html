@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Soundman OT Summary</title>
     <link rel="stylesheet" href="./dashboard/public.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
     <script type="module" src="./dashboard/public.js" defer></script>
   </head>
@@ -12,9 +13,9 @@
     <header>
       <div>
         <h1>Soundman OT Summary</h1>
-        <p>Dữ liệu dùng để đối chiếu OT với đối tác.</p>
+        <p>Dữ liệu công khai để đối chiếu thời gian OT và tổng lương.</p>
       </div>
-      <span id="last-updated">--</span>
+      <span class="badge" id="last-updated">--</span>
     </header>
 
     <main>
@@ -28,7 +29,7 @@
           <p id="total-ot">--</p>
         </article>
         <article class="card">
-          <h3>Tổng lương OT</h3>
+          <h3>OT Pay</h3>
           <p id="total-ot-pay">--</p>
         </article>
         <article class="card">
@@ -37,8 +38,19 @@
         </article>
       </section>
 
+      <section class="chart-panel">
+        <div class="panel-head">
+          <h2>OT theo tháng</h2>
+          <span>Đơn vị: phút</span>
+        </div>
+        <canvas id="otChart" height="120"></canvas>
+      </section>
+
       <section class="table-panel">
-        <h2>Chi tiết ca làm</h2>
+        <div class="panel-head">
+          <h2>Chi tiết ca làm</h2>
+          <span>Trích từ shifts_public.csv</span>
+        </div>
         <div class="table-wrapper">
           <table>
             <thead>
