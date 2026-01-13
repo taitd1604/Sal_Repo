@@ -32,3 +32,4 @@ jobs:
         with:
           commit_message: "chore: update public CSV"
           file_pattern: data/shifts_public.csv
+          token: ${{ secrets.PUBLIC_CSV_PAT }}
