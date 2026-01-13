@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Soundman OT Summary</title>
+    <link rel="stylesheet" href="./dashboard/public.css" />
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+    <script type="module" src="./dashboard/public.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Soundman OT Summary</h1>
+        <p>Dữ liệu dùng để đối chiếu OT với đối tác.</p>
+      </div>
+      <span id="last-updated">--</span>
+    </header>
+
+    <main>
+      <section class="cards">
+        <article class="card">
+          <h3>Tổng ca</h3>
+          <p id="total-shifts">--</p>
+        </article>
+        <article class="card">
+          <h3>Tổng OT (phút)</h3>
+          <p id="total-ot">--</p>
+        </article>
+        <article class="card">
+          <h3>Tổng lương OT</h3>
+          <p id="total-ot-pay">--</p>
+        </article>
+        <article class="card">
+          <h3>Tổng lương</h3>
+          <p id="total-pay">--</p>
+        </article>
+      </section>
+
+      <section class="table-panel">
+        <h2>Chi tiết ca làm</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Ngày</th>
+                <th>Loại sự kiện</th>
+                <th>Giờ kết thúc</th>
+                <th>OT (phút)</th>
+                <th>Lương OT</th>
+                <th>Tổng lương</th>
+              </tr>
+            </thead>
+            <tbody id="shift-rows">
+              <tr>
+                <td colspan="6">Đang tải dữ liệu...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+name: Export Public CSV
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "data/shifts.csv"
+      - "scripts/export_public_csv.py"
+      - ".github/workflows/export-public.yml"
+
+jobs:
+  build-public-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install --upgrade pip
+
+      - name: Generate sanitized CSV
+        run: python scripts/export_public_csv.py
+
+      - name: Commit sanitized CSV
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update public CSV"
+          file_pattern: data/shifts_public.csv

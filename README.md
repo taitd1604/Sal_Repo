@@ -64,6 +64,12 @@ Automation gồm 2 phần chính:
 2. Trong Settings → Pages → chọn Source = `Deploy from a branch`, Branch = `main`, Folder = `/`.
 3. Sau vài phút dashboard sẽ sẵn sàng tại `https://<username>.github.io/<repo>/`.
 
+### Dashboard public dùng để đối chiếu OT
+
+- `public.html` + `dashboard/public.js` chỉ đọc dữ liệu từ `data/shifts_public.csv` (được tạo từ script `scripts/export_public_csv.py`) nên không lộ thông tin nhạy cảm.
+- Chạy `python scripts/export_public_csv.py` (hoặc GitHub Action tự động hoá) mỗi khi cần cập nhật dữ liệu public rồi push file `data/shifts_public.csv`.
+- Trang public nằm tại `https://<username>.github.io/<repo>/public.html`, bạn có thể gửi link này cho đối tác để họ xem giờ kết thúc, OT và tổng lương.
+
 ### Đồng bộ dữ liệu & chạy dashboard local
 
 Bot ghi dữ liệu trực tiếp lên GitHub nên trước khi mở dashboard local bạn cần kéo file CSV mới về máy:
