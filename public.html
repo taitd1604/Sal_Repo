@@ -12,13 +12,29 @@
   <body>
     <header>
       <div>
-        <h1>Soundman OT Summary</h1>
-        <p>Dữ liệu công khai để đối chiếu thời gian OT và tổng lương.</p>
+        <h1>OVERTIME SUMMARY</h1>
       </div>
-      <span class="badge" id="last-updated">--</span>
+      <span class="badge live-badge">Live</span>
     </header>
 
     <main>
+      <section class="view-filter" aria-label="Chế độ lọc tổng quan">
+        <p class="eyebrow filter-eyebrow">Hiển thị theo</p>
+        <div class="filter-tabs" role="tablist">
+          <button class="filter-tab" type="button" data-scope="all" aria-pressed="true">Tổng</button>
+          <button class="filter-tab" type="button" data-scope="open_mic" aria-pressed="false">
+            Open mic
+          </button>
+          <button class="filter-tab" type="button" data-scope="live_show" aria-pressed="false">
+            Đêm nhạc
+          </button>
+        </div>
+        <div class="filter-control">
+          <select id="public-month-filter">
+            <option value="all">Tất cả tháng</option>
+          </select>
+        </div>
+      </section>
       <section class="cards">
         <article class="card">
           <h3>Tổng ca</h3>
@@ -40,7 +56,7 @@
 
       <section class="chart-panel">
         <div class="panel-head">
-          <h2>OT theo tháng</h2>
+          <h2>OT theo ngày</h2>
           <span>Đơn vị: phút</span>
         </div>
         <canvas id="otChart" height="120"></canvas>
@@ -48,8 +64,9 @@
 
       <section class="table-panel">
         <div class="panel-head">
-          <h2>Chi tiết ca làm</h2>
-          <span>Trích từ shifts_public.csv</span>
+          <div class="panel-title">
+            <h2>Chi tiết ca làm</h2>
+          </div>
         </div>
         <div class="table-wrapper">
           <table>

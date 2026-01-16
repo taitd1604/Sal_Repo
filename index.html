@@ -18,6 +18,23 @@
       <span class="badge">Live</span>
     </header>
     <main>
+      <section class="view-filter" aria-label="Chế độ lọc tổng quan">
+        <p class="eyebrow filter-eyebrow">Hiển thị theo</p>
+        <div class="filter-tabs" role="tablist">
+          <button class="filter-tab" type="button" data-scope="all" aria-pressed="true">Tổng</button>
+          <button class="filter-tab" type="button" data-scope="open_mic" aria-pressed="false">
+            Open mic
+          </button>
+          <button class="filter-tab" type="button" data-scope="live_show" aria-pressed="false">
+            Đêm nhạc
+          </button>
+        </div>
+        <div class="filter-control">
+          <select id="month-filter">
+            <option value="all">Tất cả tháng</option>
+          </select>
+        </div>
+      </section>
       <section class="cards">
         <article class="card">
           <h3>Tổng thu</h3>
@@ -59,8 +76,16 @@
 
       <section class="table-panel">
         <div class="panel-head">
-          <h2>Chi tiết ca làm gần đây</h2>
-          <span id="last-updated"></span>
+          <div class="panel-title">
+            <h2>Chi tiết ca làm gần đây</h2>
+            <span id="last-updated"></span>
+          </div>
+          <div class="panel-control">
+            <label class="sr-only" for="event-filter">Lọc theo loại sự kiện</label>
+            <select id="event-filter">
+              <option value="all">Tất cả loại</option>
+            </select>
+          </div>
         </div>
         <div class="table-wrapper">
           <table>

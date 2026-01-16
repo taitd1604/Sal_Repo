@@ -67,6 +67,61 @@ main {
   gap: 2.5rem;
 }
 
+.view-filter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  border: 4px solid var(--ink);
+  padding: 1.5rem clamp(1rem, 5vw, 2.5rem);
+  background: var(--paper);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+}
+
+.filter-eyebrow {
+  font-size: 0.8rem;
+}
+
+.filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.filter-control {
+  margin-top: 0.5rem;
+}
+
+.filter-tab {
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  padding: 0.85rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 6px 6px 0 var(--ink);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.filter-tab.is-active {
+  background: var(--accent);
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0 var(--ink);
+}
+
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -118,6 +173,13 @@ main {
   padding-bottom: 0.75rem;
 }
 
+.panel-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: flex-start;
+}
+
 .panel-head h2 {
   margin: 0;
   font-size: 1.4rem;
@@ -125,10 +187,33 @@ main {
   letter-spacing: 0.08em;
 }
 
+#last-updated {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.panel-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
 select {
   border: 3px solid var(--ink);
-  padding: 0.6rem 1.2rem;
-  font-size: 0.95rem;
+  padding: 0.55rem 1.05rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-transform: uppercase;
   background: var(--accent);
@@ -193,6 +278,10 @@ tbody tr:hover {
   .panel-head {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .panel-control {
+    width: 100%;
   }
 
   select {
