@@ -64,12 +64,23 @@
 
       <section class="chart-panel">
         <div class="panel-head">
-          <h2>Thu nhập theo tháng</h2>
-          <select id="chart-mode">
-            <option value="total_pay" selected>Tổng lương</option>
-            <option value="net_income">Thu ròng</option>
-            <option value="ot_pay">Lương OT</option>
-          </select>
+          <div class="panel-title">
+            <h2>Thu nhập</h2>
+            <p class="eyebrow" id="chart-caption">Theo tháng</p>
+          </div>
+          <div class="panel-control chart-control">
+            <label class="sr-only" for="chart-interval">Khoảng thời gian</label>
+            <select id="chart-interval">
+              <option value="month" selected>Theo tháng</option>
+              <option value="day">Theo ngày</option>
+            </select>
+            <label class="sr-only" for="chart-mode">Chỉ số biểu đồ</label>
+            <select id="chart-mode">
+              <option value="total_pay" selected>Tổng lương</option>
+              <option value="net_income">Thu ròng</option>
+              <option value="ot_pay">Lương OT</option>
+            </select>
+          </div>
         </div>
         <canvas id="monthlyChart" height="120"></canvas>
       </section>

@@ -21,6 +21,18 @@ const VIEW_SCOPES = {
   },
 };
 
+const CHART_LABELS = {
+  total_pay: "Tổng lương",
+  net_income: "Thu ròng",
+  ot_pay: "Lương OT",
+};
+
+const CHART_COLORS = {
+  total_pay: "#6366f1",
+  net_income: "#0f766e",
+  ot_pay: "#f97316",
+};
+
 const state = {
   rows: [],
   chart: null,
@@ -29,12 +41,14 @@ const state = {
     scope: getInitialScope(),
     month: getInitialMonth(),
   },
+  chartInterval: "month",
 };
 
 async function init() {
   setupScopeFilter();
   setupEventFilter();
   setupMonthFilter();
+  setupChartControls();
   try {
     const rows = await loadCsv("./data/shifts.csv");
     state.rows = rows;
@@ -47,11 +61,6 @@ async function init() {
     updateMonthOptions(rows);
     updateEventFilterOptions(getScopeAndMonthRows());
     refreshDashboard();
-    document
-      .getElementById("chart-mode")
-      .addEventListener("change", (event) => {
-        renderChart(getScopeAndMonthRows(), event.target.value);
-      });
   } catch (error) {
     console.error(error);
     const body = document.getElementById("shift-rows");
@@ -141,6 +150,31 @@ function setupMonthFilter() {
   });
 }
 
+function setupChartControls() {
+  const modeSelect = document.getElementById("chart-mode");
+  if (modeSelect) {
+    modeSelect.addEventListener("change", () => {
+      if (!state.rows.length) {
+        return;
+      }
+      renderChart(getScopeAndMonthRows());
+    });
+  }
+  const intervalSelect = document.getElementById("chart-interval");
+  if (intervalSelect) {
+    intervalSelect.addEventListener("change", (event) => {
+      state.chartInterval = event.target.value;
+      if (!state.rows.length) {
+        updateChartCaption(
+          state.chartInterval === "day" ? "Theo ngày" : "Theo tháng"
+        );
+        return;
+      }
+      renderChart(getScopeAndMonthRows());
+    });
+  }
+}
+
 function updateEventFilterOptions(rows) {
   const select = document.getElementById("event-filter");
   if (!select) {
@@ -218,7 +252,21 @@ function renderTable(rows) {
     .join("");
 }
 
-function renderChart(rows, metric = "total_pay") {
+function renderChart(rows) {
+  const metric = getSelectedChartMetric();
+  if (!rows.length) {
+    destroyChart();
+    updateChartCaption(state.chartInterval === "day" ? "Theo ngày (không có dữ liệu)" : "Theo tháng (không có dữ liệu)");
+    return;
+  }
+  if (state.chartInterval === "day") {
+    renderDailyChart(rows, metric);
+  } else {
+    renderMonthlyChart(rows, metric);
+  }
+}
+
+function renderMonthlyChart(rows, metric) {
   const monthly = {};
   rows.forEach((row) => {
     const month = row.date.slice(0, 7);
@@ -226,17 +274,8 @@ function renderChart(rows, metric = "total_pay") {
   });
   const labels = Object.keys(monthly).sort();
   const data = labels.map((label) => Math.round(monthly[label]));
-  const labelMap = {
-    total_pay: "Tổng lương",
-    net_income: "Thu ròng",
-    ot_pay: "Lương OT",
-  };
-  const colorMap = {
-    total_pay: "#6366f1",
-    net_income: "#0f766e",
-    ot_pay: "#f97316",
-  };
-  const datasetLabel = labelMap[metric] || "Tổng lương";
+  const datasetLabel = CHART_LABELS[metric] || CHART_LABELS.total_pay;
+  const color = CHART_COLORS[metric] || CHART_COLORS.total_pay;
   const config = {
     type: "bar",
     data: {
@@ -245,7 +284,7 @@ function renderChart(rows, metric = "total_pay") {
         {
           label: datasetLabel,
           data,
-          backgroundColor: colorMap[metric] || colorMap.total_pay,
+          backgroundColor: color,
         },
       ],
     },
@@ -261,12 +300,119 @@ function renderChart(rows, metric = "total_pay") {
       },
     },
   };
+  updateChartCaption("Theo tháng");
+  drawChart(config);
+}
 
+function renderDailyChart(rows, metric) {
+  const { month, rows: monthRows } = getDailyChartRows(rows);
+  if (!month || !monthRows.length) {
+    destroyChart();
+    updateChartCaption("Theo ngày (không có dữ liệu)");
+    return;
+  }
+  const daily = {};
+  monthRows.forEach((row) => {
+    const dayKey = row.date;
+    daily[dayKey] = (daily[dayKey] || 0) + (row[metric] || 0);
+  });
+  const labels = Object.keys(daily).sort();
+  const data = labels.map((label) => Math.round(daily[label]));
+  const datasetLabel = `${CHART_LABELS[metric] || CHART_LABELS.total_pay} / ngày`;
+  const color = CHART_COLORS[metric] || CHART_COLORS.total_pay;
+  const fillColor = color.length === 7 ? `${color}33` : color;
+  const config = {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: datasetLabel,
+          data,
+          borderColor: color,
+          backgroundColor: fillColor,
+          borderWidth: 3,
+          tension: 0.25,
+          pointRadius: 4,
+          pointBackgroundColor: color,
+          fill: true,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) => currency.format(value),
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  };
+  updateChartCaption(`Theo ngày (${formatMonthLabel(month)})`);
+  drawChart(config);
+}
+
+function drawChart(config) {
   if (state.chart) {
     state.chart.destroy();
   }
-  const ctx = document.getElementById("monthlyChart").getContext("2d");
+  const canvas = document.getElementById("monthlyChart");
+  if (!canvas) {
+    return;
+  }
+  const ctx = canvas.getContext("2d");
   state.chart = new Chart(ctx, config);
+}
+
+function destroyChart() {
+  if (state.chart) {
+    state.chart.destroy();
+    state.chart = null;
+  }
+}
+
+function getDailyChartRows(rows) {
+  const months = Array.from(
+    new Set(
+      rows
+        .map((row) => (row.date ? row.date.slice(0, 7) : null))
+        .filter((value) => value)
+    )
+  ).sort((a, b) => (a > b ? -1 : 1));
+  if (!months.length) {
+    return { month: null, rows: [] };
+  }
+  let selectedMonth = state.filters.month;
+  if (selectedMonth === "all" || !months.includes(selectedMonth)) {
+    selectedMonth = months[0];
+  }
+  const monthRows = rows.filter(
+    (row) => row.date && row.date.slice(0, 7) === selectedMonth
+  );
+  return { month: selectedMonth, rows: monthRows };
+}
+
+function updateChartCaption(text) {
+  const caption = document.getElementById("chart-caption");
+  if (caption) {
+    caption.textContent = text;
+  }
+}
+
+function getSelectedChartMetric() {
+  const select = document.getElementById("chart-mode");
+  if (!select) {
+    return "total_pay";
+  }
+  return select.value || "total_pay";
 }
 
 function renderEmptyState() {
@@ -279,6 +425,8 @@ function renderEmptyState() {
   document.getElementById("last-updated").textContent = "";
   document.getElementById("shift-rows").innerHTML =
     '<tr><td colspan="9">Chưa có dữ liệu, hãy log ca đầu tiên nhé!</td></tr>';
+  destroyChart();
+  updateChartCaption("Theo tháng");
 }
 
 function getInitialScope() {
@@ -341,7 +489,7 @@ function updateScopeButtons() {
 function refreshDashboard() {
   const scopedRows = getScopeAndMonthRows();
   updateSummary(scopedRows);
-  renderChart(scopedRows, document.getElementById("chart-mode").value);
+  renderChart(scopedRows);
   renderTable(getFilteredRows());
 }
 
