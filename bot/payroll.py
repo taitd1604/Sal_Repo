@@ -15,12 +15,12 @@ SHIFT_CONFIG = {
     "openmic": {
         "label": "Openmic",
         "start_time": time(hour=20, minute=0),
-        "scheduled_end": time(hour=23, minute=0),
+        "scheduled_end": time(hour=22, minute=30),
         "base_pay": 500_000,
     },
 }
 
-OUTSOURCED_PAY_CHOICES = (400_000, 500_000, 600_000)
+OUTSOURCED_PAY_CHOICES = (300_000, 500_000, 600_000)
 
 CSV_HEADER = [
     "date",
