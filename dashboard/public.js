@@ -50,7 +50,7 @@ async function init() {
   } catch (error) {
     console.error(error);
     document.getElementById("shift-rows").innerHTML =
-      `<tr><td colspan="6">Không thể tải dữ liệu: ${error.message}</td></tr>`;
+      `<tr><td colspan="5">Không thể tải dữ liệu: ${error.message}</td></tr>`;
   }
 }
 
@@ -76,7 +76,6 @@ function updateSummary(rows) {
     document.getElementById("total-shifts").textContent = "0";
     document.getElementById("total-ot").textContent = "0";
     document.getElementById("total-ot-pay").textContent = "0";
-    document.getElementById("total-pay").textContent = "0";
     const stamp = document.getElementById("last-updated");
     if (stamp) {
       stamp.textContent = "Chưa có dữ liệu cho chế độ này";
@@ -86,11 +85,9 @@ function updateSummary(rows) {
   const totalShifts = rows.length;
   const totalOt = rows.reduce((sum, row) => sum + row.ot_minutes, 0);
   const totalOtPay = rows.reduce((sum, row) => sum + row.ot_pay, 0);
-  const totalPay = rows.reduce((sum, row) => sum + row.total_pay, 0);
   document.getElementById("total-shifts").textContent = totalShifts;
   document.getElementById("total-ot").textContent = totalOt;
   document.getElementById("total-ot-pay").textContent = currency.format(totalOtPay);
-  document.getElementById("total-pay").textContent = currency.format(totalPay);
   const lastDate = rows.reduce((max, row) => (row.date > max ? row.date : max), rows[0].date);
   const stamp = document.getElementById("last-updated");
   if (stamp) {
@@ -182,7 +179,7 @@ function renderTable(rows) {
   const body = document.getElementById("shift-rows");
   if (!rows.length) {
     body.innerHTML =
-      '<tr><td colspan="6">Không có ca nào khớp với bộ lọc hiện tại.</td></tr>';
+      '<tr><td colspan="5">Không có ca nào khớp với bộ lọc hiện tại.</td></tr>';
     return;
   }
   const sorted = [...rows].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -190,12 +187,11 @@ function renderTable(rows) {
     .map(
       (row) => `
       <tr>
-        <td>${row.date}</td>
+        <td>${formatDateLabel(row.date)}</td>
         <td>${row.event_type}</td>
         <td>${row.actual_end_time}</td>
         <td>${row.ot_minutes}</td>
         <td>${currency.format(row.ot_pay)}</td>
-        <td>${currency.format(row.total_pay)}</td>
       </tr>`
     )
     .join("");
@@ -253,13 +249,12 @@ function renderEmptyState() {
   document.getElementById("total-shifts").textContent = "0";
   document.getElementById("total-ot").textContent = "0";
   document.getElementById("total-ot-pay").textContent = "0";
-  document.getElementById("total-pay").textContent = "0";
   const stamp = document.getElementById("last-updated");
   if (stamp) {
     stamp.textContent = "--";
   }
   document.getElementById("shift-rows").innerHTML =
-    '<tr><td colspan="6">Chưa có dữ liệu để hiển thị</td></tr>';
+    '<tr><td colspan="5">Chưa có dữ liệu để hiển thị</td></tr>';
   if (state.chart) {
     state.chart.destroy();
     state.chart = null;
@@ -379,6 +374,17 @@ function getInitialMonth() {
     return month;
   }
   return "all";
+}
+
+function formatDateLabel(value) {
+  if (!value || !value.includes("-")) {
+    return value || "";
+  }
+  const [year, month, day] = value.split("-");
+  if (!day) {
+    return value;
+  }
+  return `${day}/${month}/${year}`;
 }
 
 init();

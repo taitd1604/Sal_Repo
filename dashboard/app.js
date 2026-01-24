@@ -119,6 +119,10 @@ function updateSummary(rows) {
 
 function setupEventFilter() {
   const select = document.getElementById("event-filter");
+  if (!select) {
+    state.filters.eventType = "all";
+    return;
+  }
   select.addEventListener("change", (event) => {
     state.filters.eventType = event.target.value;
     renderTable(getFilteredRows());
@@ -139,6 +143,10 @@ function setupMonthFilter() {
 
 function updateEventFilterOptions(rows) {
   const select = document.getElementById("event-filter");
+  if (!select) {
+    state.filters.eventType = "all";
+    return;
+  }
   const types = Array.from(
     new Set(
       rows
@@ -196,7 +204,7 @@ function renderTable(rows) {
     .map(
       (row) => `
       <tr>
-        <td>${row.date}</td>
+        <td>${formatDateLabel(row.date)}</td>
         <td>${row.venue}</td>
         <td>${row.event_type}</td>
         <td>${row.performed_by}</td>
@@ -377,6 +385,17 @@ function formatMonthLabel(value) {
   }
   const [year, month] = value.split("-");
   return `Tháng ${month}/${year}`;
+}
+
+function formatDateLabel(value) {
+  if (!value || !value.includes("-")) {
+    return value || "";
+  }
+  const [year, month, day] = value.split("-");
+  if (!day) {
+    return value;
+  }
+  return `${day}/${month}/${year}`;
 }
 
 function getInitialMonth() {
