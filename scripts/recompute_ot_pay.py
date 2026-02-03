@@ -30,13 +30,13 @@ def _parse_int(value: str, default: int = 0) -> int:
     text = str(value).strip()
     if not text:
         return default
+    normalized = "".join(ch for ch in text if ch.isdigit() or ch == "-")
+    if normalized in {"", "-"}:
+        return default
     try:
-        return int(text)
+        return int(normalized)
     except ValueError:
-        try:
-            return int(float(text))
-        except ValueError:
-            return default
+        return default
 
 
 def _calculate_ot_pay(ot_minutes: int) -> int:
@@ -98,4 +98,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
