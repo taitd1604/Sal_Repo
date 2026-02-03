@@ -51,7 +51,7 @@ Automation gồm 2 phần chính:
    python bot/main.py
    ```
 
-   Bot sẽ hướng dẫn lần lượt: ngày → địa điểm → loại sự kiện → người trực → giờ kết thúc. Sau khi xác nhận sẽ append dòng mới vào `data/shifts.csv` với các cột: ngày, địa điểm, base pay, OT (theo block 15 phút, rate = `(base pay / tổng giờ chuẩn)*0.25`).
+   Bot sẽ hướng dẫn lần lượt: ngày → địa điểm → loại sự kiện → người trực → giờ kết thúc. Sau khi xác nhận sẽ append dòng mới vào `data/shifts.csv` với các cột: ngày, địa điểm, base pay, OT (theo block 15 phút, mỗi block = `50.000đ`).
 
 4. Deploy bot trên service tuỳ thích (server nhà, Railway, Render...). Đừng quên cấu hình biến môi trường y hệt `.env`.
 

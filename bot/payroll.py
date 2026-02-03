@@ -21,6 +21,8 @@ SHIFT_CONFIG = {
 }
 
 OUTSOURCED_PAY_CHOICES = (300_000, 500_000, 600_000)
+OT_BLOCK_MINUTES = 15
+OT_BLOCK_PAY = 50_000
 
 CSV_HEADER = [
     "date",
@@ -56,10 +58,9 @@ class ShiftPayload:
         if actual_end_dt < scheduled_start_dt:
             actual_end_dt += timedelta(days=1)
 
-        duration_hours = (scheduled_end_dt - scheduled_start_dt).total_seconds() / 3600
         base_pay = cfg["base_pay"]
         ot_minutes = _calculate_ot_minutes(scheduled_end_dt, actual_end_dt)
-        ot_pay = _calculate_ot_pay(base_pay, duration_hours, ot_minutes)
+        ot_pay = _calculate_ot_pay(ot_minutes)
         total_pay = base_pay + ot_pay
         worker_payment = self.worker_payment if self.performed_by == "outsourced" else 0
         net_income = total_pay - worker_payment
@@ -83,9 +84,10 @@ class ShiftPayload:
     def summary(self) -> str:
         computed = self.compute()
         return (
-            f"{computed['date']} – {computed['event_type']} tại {computed['venue']}\n"
-            f"Người trực: {computed['performed_by']}\n"
-            f"Base pay: {computed['base_pay']} | OT: {computed['ot_pay']} | Tổng: {computed['total_pay']} | Ròng: {computed['net_income']}"
+            "💾 Đã lưu!\n"
+            f"🗓️ {computed['date']} – {computed['event_type']} tại {computed['venue']}\n"
+            f"👤 Người trực: {computed['performed_by']}\n"
+            f"💰 Base pay: {computed['base_pay']} | ⏱️ OT: {computed['ot_pay']} | 💵 Tổng: {computed['total_pay']} | 📉 Ròng: {computed['net_income']}"
         )
 
 
@@ -93,15 +95,14 @@ def _calculate_ot_minutes(scheduled_end: datetime, actual_end: datetime) -> int:
     if actual_end <= scheduled_end:
         return 0
     diff_minutes = (actual_end - scheduled_end).total_seconds() / 60
-    return int(math.ceil(diff_minutes / 15) * 15)
+    return int(math.ceil(diff_minutes / OT_BLOCK_MINUTES) * OT_BLOCK_MINUTES)
 
 
-def _calculate_ot_pay(base_pay: float, duration_hours: float, ot_minutes: int) -> float:
+def _calculate_ot_pay(ot_minutes: int) -> int:
     if ot_minutes <= 0:
-        return 0.0
-    hourly_rate = base_pay / duration_hours
-    ot_blocks = ot_minutes / 15
-    return ot_blocks * hourly_rate * 0.25
+        return 0
+    ot_blocks = int(math.ceil(ot_minutes / OT_BLOCK_MINUTES))
+    return ot_blocks * OT_BLOCK_PAY
 
 
 def available_event_types() -> Dict[str, Tuple[str, str]]:
