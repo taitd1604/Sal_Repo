@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 from typing import Dict, Tuple
+
+# Lương giờ cơ bản: 200.000đ/giờ. Base pay của mỗi ca = số giờ dự kiến × lương giờ.
+HOURLY_PAY = 200_000
+# OT = 150% lương giờ, tính theo phút chính xác (không làm tròn).
+OT_RATE_PER_MINUTE = HOURLY_PAY * 1.5 / 60  # = 5.000đ/phút
 
 SHIFT_CONFIG = {
     "dem_nhac": {
         "label": "Đêm nhạc",
         "start_time": time(hour=19, minute=30),
-        "scheduled_end": time(hour=23, minute=0),
+        "scheduled_end": time(hour=22, minute=30),
         "base_pay": 600_000,
     },
     "openmic": {
@@ -21,8 +25,6 @@ SHIFT_CONFIG = {
 }
 
 OUTSOURCED_PAY_CHOICES = (300_000, 500_000, 600_000)
-OT_BLOCK_MINUTES = 15
-OT_BLOCK_PAY = 50_000
 
 CSV_HEADER = [
     "date",
@@ -94,15 +96,14 @@ class ShiftPayload:
 def _calculate_ot_minutes(scheduled_end: datetime, actual_end: datetime) -> int:
     if actual_end <= scheduled_end:
         return 0
-    diff_minutes = (actual_end - scheduled_end).total_seconds() / 60
-    return int(math.ceil(diff_minutes / OT_BLOCK_MINUTES) * OT_BLOCK_MINUTES)
+    diff_seconds = (actual_end - scheduled_end).total_seconds()
+    return int(round(diff_seconds / 60))
 
 
 def _calculate_ot_pay(ot_minutes: int) -> int:
     if ot_minutes <= 0:
         return 0
-    ot_blocks = int(math.ceil(ot_minutes / OT_BLOCK_MINUTES))
-    return ot_blocks * OT_BLOCK_PAY
+    return int(round(ot_minutes * OT_RATE_PER_MINUTE))
 
 
 def available_event_types() -> Dict[str, Tuple[str, str]]:
