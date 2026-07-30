@@ -13,7 +13,7 @@ SHIFT_CONFIG = {
     "dem_nhac": {
         "label": "Đêm nhạc",
         "start_time": time(hour=19, minute=30),
-        "scheduled_end": time(hour=22, minute=30),
+        "scheduled_end": time(hour=23, minute=0),
         "base_pay": 600_000,
     },
     "openmic": {

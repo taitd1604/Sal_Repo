@@ -35,7 +35,7 @@ OT_RATE_PER_MINUTE = HOURLY_PAY * 1.5 / 60  # = 5.000đ/phút
 
 # Scheduled end mới theo loại ca (label trong CSV).
 SCHEDULED_END_BY_EVENT = {
-    "Đêm nhạc": "22:30",
+    "Đêm nhạc": "23:00",
     "Openmic": "22:30",
 }
 
