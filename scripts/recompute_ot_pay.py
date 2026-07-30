@@ -33,10 +33,10 @@ NEW_RULE_FROM_DATE = date(2026, 7, 1)
 HOURLY_PAY = 200_000
 OT_RATE_PER_MINUTE = HOURLY_PAY * 1.5 / 60  # = 5.000đ/phút
 
-# Scheduled end mới theo loại ca (label trong CSV).
-SCHEDULED_END_BY_EVENT = {
-    "Đêm nhạc": "23:00",
-    "Openmic": "22:30",
+# Cấu hình giờ theo loại ca (label trong CSV). Phải khớp với bot/payroll.py.
+EVENT_TIME_CONFIG = {
+    "Đêm nhạc": {"start": "19:30", "scheduled_end": "23:00"},
+    "Openmic": {"start": "20:00", "scheduled_end": "22:30"},
 }
 
 
@@ -131,8 +131,8 @@ def main() -> None:
                 continue
 
             event_label = (row.get("event_type") or "").strip()
-            scheduled_end_str = SCHEDULED_END_BY_EVENT.get(event_label)
-            if scheduled_end_str is None:
+            event_cfg = EVENT_TIME_CONFIG.get(event_label)
+            if event_cfg is None:
                 skipped_unknown_event += 1
                 rows.append(row)
                 continue
@@ -142,10 +142,14 @@ def main() -> None:
                 rows.append(row)
                 continue
 
+            scheduled_end_str = event_cfg["scheduled_end"]
+            start_dt = _time_on(row_date, event_cfg["start"])
             scheduled_end_dt = _time_on(row_date, scheduled_end_str)
             actual_end_dt = _time_on(row_date, actual_end_str)
-            if actual_end_dt < scheduled_end_dt:
-                # Xử lý qua đêm (hiếm nhưng phòng xa).
+            # Xử lý qua đêm: chỉ cộng 1 ngày khi actual_end sớm hơn start_time
+            # (tức ca kéo dài qua nửa đêm). Tránh nhầm ca kết thúc sớm hơn
+            # scheduled_end (vd 22:42 < 23:00) với ca qua ngày.
+            if actual_end_dt < start_dt:
                 actual_end_dt = datetime.combine(
                     row_date + timedelta(days=1),
                     actual_end_dt.time(),
