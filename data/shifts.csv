@@ -139,3 +139,4 @@ date,venue,event_type,performed_by,start_time,scheduled_end_time,actual_end_time
 2026-08-27,Bee Night,Openmic,Thuê ngoài,20:00,22:30,23:10,500000,40,200000,700000,300000,400000
 2026-08-28,Bee Night,Đêm nhạc,Tự làm,19:30,23:00,23:40,600000,40,200000,800000,0,800000
 2026-09-04,Bee Night,Đêm nhạc,Tự làm,19:30,23:00,23:35,600000,35,175000,775000,0,775000
+2026-09-05,Bee Night,Openmic,Tự làm,20:00,22:30,22:36,500000,6,30000,530000,0,530000
