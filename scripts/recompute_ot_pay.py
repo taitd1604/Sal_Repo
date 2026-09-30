@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Recompute OT pay for existing shifts.csv rows.
 
-Rule (áp dụng từ 2026-07-01):
-- Lương giờ cơ bản: 200.000đ/giờ.
-- OT = 150% lương giờ = 5.000đ/phút, tính theo phút chính xác (không làm tròn).
-- Scheduled end: Đêm nhạc & Openmic đều kết thúc lúc 22:30.
+Rule (áp dụng từ 2026-09-01):
+- Đêm nhạc: 4.300đ/phút, OT sau 23:00.
+- Openmic: 5.000đ/phút, OT sau 22:30.
+- Tính theo số phút chính xác, không làm tròn theo block.
 
 Script chỉ cập nhật các dòng có date >= NEW_RULE_FROM_DATE.
-Các dòng trước ngày này được giữ nguyên (dùng rule cũ: block 15 phút × 50.000đ).
+Các dòng trước ngày này được giữ nguyên.
 
 Columns được cập nhật:
-- scheduled_end_time (Đêm nhạc: 23:00 -> 22:30)
+- scheduled_end_time
 - ot_minutes
 - ot_pay
 - total_pay
@@ -27,16 +27,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE = REPO_ROOT / "data" / "shifts.csv"
 
 # Rule mới áp dụng từ ngày này (gồm). Trước ngày này: giữ nguyên.
-NEW_RULE_FROM_DATE = date(2026, 7, 1)
-
-# Lương giờ cơ bản & OT rate (phải khớp với bot/payroll.py).
-HOURLY_PAY = 200_000
-OT_RATE_PER_MINUTE = HOURLY_PAY * 1.5 / 60  # = 5.000đ/phút
+NEW_RULE_FROM_DATE = date(2026, 9, 1)
 
 # Cấu hình giờ theo loại ca (label trong CSV). Phải khớp với bot/payroll.py.
 EVENT_TIME_CONFIG = {
-    "Đêm nhạc": {"start": "19:30", "scheduled_end": "23:00"},
-    "Openmic": {"start": "20:00", "scheduled_end": "22:30"},
+    "Đêm nhạc": {"start": "19:30", "scheduled_end": "23:00", "ot_rate_per_minute": 4_300},
+    "Openmic": {"start": "20:00", "scheduled_end": "22:30", "ot_rate_per_minute": 5_000},
 }
 
 
@@ -78,10 +74,10 @@ def _calculate_ot_minutes(scheduled_end: datetime, actual_end: datetime) -> int:
     return int(round(diff_seconds / 60))
 
 
-def _calculate_ot_pay(ot_minutes: int) -> int:
+def _calculate_ot_pay(ot_minutes: int, ot_rate_per_minute: int) -> int:
     if ot_minutes <= 0:
         return 0
-    return int(round(ot_minutes * OT_RATE_PER_MINUTE))
+    return ot_minutes * ot_rate_per_minute
 
 
 def main() -> None:
@@ -159,7 +155,7 @@ def main() -> None:
             worker_payment = _parse_int(row.get("worker_payment", "0"))
 
             ot_minutes = _calculate_ot_minutes(scheduled_end_dt, actual_end_dt)
-            ot_pay = _calculate_ot_pay(ot_minutes)
+            ot_pay = _calculate_ot_pay(ot_minutes, event_cfg["ot_rate_per_minute"])
             total_pay = base_pay + ot_pay
             net_income = total_pay - worker_payment
 

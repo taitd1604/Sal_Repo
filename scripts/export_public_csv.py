@@ -27,7 +27,7 @@ def main() -> None:
 
     with SOURCE.open("r", encoding="utf-8") as src, DESTINATION.open("w", encoding="utf-8", newline="") as dst:
         reader = csv.DictReader(src)
-        writer = csv.DictWriter(dst, fieldnames=PUBLIC_COLUMNS)
+        writer = csv.DictWriter(dst, fieldnames=PUBLIC_COLUMNS, lineterminator="\n")
         writer.writeheader()
         for row in reader:
             if not row.get("date"):

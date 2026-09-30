@@ -4,10 +4,9 @@ from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 from typing import Dict, Tuple
 
-# Lương giờ cơ bản: 200.000đ/giờ. Base pay của mỗi ca = số giờ dự kiến × lương giờ.
-HOURLY_PAY = 200_000
-# OT = 150% lương giờ, tính theo phút chính xác (không làm tròn).
-OT_RATE_PER_MINUTE = HOURLY_PAY * 1.5 / 60  # = 5.000đ/phút
+# Từ tháng 9/2026, OT được tính theo đơn giá riêng của từng loại ca.
+NEW_OT_RULE_FROM_DATE = date(2026, 9, 1)
+LEGACY_OT_RATE_PER_MINUTE = 5_000
 
 SHIFT_CONFIG = {
     "dem_nhac": {
@@ -15,12 +14,14 @@ SHIFT_CONFIG = {
         "start_time": time(hour=19, minute=30),
         "scheduled_end": time(hour=23, minute=0),
         "base_pay": 600_000,
+        "ot_rate_per_minute": 4_300,
     },
     "openmic": {
         "label": "Openmic",
         "start_time": time(hour=20, minute=0),
         "scheduled_end": time(hour=22, minute=30),
         "base_pay": 500_000,
+        "ot_rate_per_minute": 5_000,
     },
 }
 
@@ -62,7 +63,12 @@ class ShiftPayload:
 
         base_pay = cfg["base_pay"]
         ot_minutes = _calculate_ot_minutes(scheduled_end_dt, actual_end_dt)
-        ot_pay = _calculate_ot_pay(ot_minutes)
+        ot_rate_per_minute = (
+            cfg["ot_rate_per_minute"]
+            if self.date >= NEW_OT_RULE_FROM_DATE
+            else LEGACY_OT_RATE_PER_MINUTE
+        )
+        ot_pay = _calculate_ot_pay(ot_minutes, ot_rate_per_minute)
         total_pay = base_pay + ot_pay
         worker_payment = self.worker_payment if self.performed_by == "outsourced" else 0
         net_income = total_pay - worker_payment
@@ -100,10 +106,10 @@ def _calculate_ot_minutes(scheduled_end: datetime, actual_end: datetime) -> int:
     return int(round(diff_seconds / 60))
 
 
-def _calculate_ot_pay(ot_minutes: int) -> int:
+def _calculate_ot_pay(ot_minutes: int, ot_rate_per_minute: int) -> int:
     if ot_minutes <= 0:
         return 0
-    return int(round(ot_minutes * OT_RATE_PER_MINUTE))
+    return ot_minutes * ot_rate_per_minute
 
 
 def available_event_types() -> Dict[str, Tuple[str, str]]:

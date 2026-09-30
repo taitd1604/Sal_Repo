@@ -51,7 +51,7 @@ Automation gồm 2 phần chính:
    python bot/main.py
    ```
 
-   Bot sẽ hướng dẫn lần lượt: ngày → địa điểm → loại sự kiện → người trực → giờ kết thúc. Sau khi xác nhận sẽ append dòng mới vào `data/shifts.csv` với các cột: ngày, địa điểm, base pay, OT (theo block 15 phút, mỗi block = `50.000đ`).
+   Bot sẽ hướng dẫn lần lượt: ngày → địa điểm → loại sự kiện → người trực → giờ kết thúc. Sau khi xác nhận sẽ append dòng mới vào `data/shifts.csv` với các cột: ngày, địa điểm, base pay và OT theo số phút thực tế. Từ 01/09/2026, Đêm nhạc tính OT `4.300đ/phút` sau 23:00; Openmic tính OT `5.000đ/phút` sau 22:30.
 
 4. Deploy bot trên service tuỳ thích (server nhà, Railway, Render...). Đừng quên cấu hình biến môi trường y hệt `.env`.
 
